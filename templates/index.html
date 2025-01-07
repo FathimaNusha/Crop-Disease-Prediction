@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Image Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4c68af;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #7890ca;
+        }
+
+        #prediction-result {
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        #prediction-result img {
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+
+        p {
+            color: #555;
+            font-size: 16px;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crop Disease Prediction</h1>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="image">Choose an Image</label>
+        <input type="file" id="image" name="image" accept="image/*" required>
+        <button type="submit">Predict the Disease</button>
+    </form>
+
+    <div id="prediction-result"></div>
+
+    <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const formData = new FormData();
+        formData.append("image", document.getElementById('image').files[0]);
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                document.getElementById('prediction-result').innerHTML = `
+                    <h3>Predictions</h3>
+                    <p>${data.predictions.join(', ')}</p>
+                    <p><img src="${data.image_path}" alt="Predicted Image" width="300"></p>
+                `;
+            } else {
+                document.getElementById('prediction-result').innerHTML = `<p class="error">Error: ${data.error}</p>`;
+            }
+        } catch (error) {
+            document.getElementById('prediction-result').innerHTML = `<p class="error">Error connecting to server.</p>`;
+        }
+    });
+    </script>
+</body>
+</html>
